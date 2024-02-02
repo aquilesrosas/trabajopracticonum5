@@ -11,15 +11,6 @@ def cargar_alumnos():
         return {"Alumnos": []}
 
 
-def mostrar_alumnos():
-    with open(script+"/data.json") as file:
-        data= json.load(file)
-    for Alumnos in data["Alumnos"]:
-        print("Nombre", Alumnos["Nombre"])
-        print("Apellido",Alumnos["Apellido"])
-        print("DNI",Alumnos["DNI"])
-        print("Fecha de nacimiento",Alumnos["Fecha de nacimiento"])
-        print("Tutor",Alumnos["Tutor"])
 
 def guardar_alumnos(alumnos):
     with open(script, "w") as file:
@@ -109,4 +100,106 @@ def expulsar_alumno():
     else:
         print("Error en el formato del archivo 'data.json'.")
         
+
+
+
+
+class Alumno:
+    def __init__(self, nombre, apellido, dni, fecha_nacimiento, tutor):
+        self.nombre = nombre
+        self.apellido = apellido
+        self.dni = dni
+        self.fecha_nacimiento = fecha_nacimiento
+        self.tutor = tutor
+        self.notas = []
+        self.faltas = 0
+        self.amonestaciones = 0
+
+    def ingresar_nota(self, nota):
+        self.notas.append(nota)
+
+    def asignar_falta(self):
+        self.faltas += 1
+
+    def asignar_amonestacion(self):
+        self.amonestaciones += 1
+
+    def cambiar_domicilio(self, nuevo_domicilio):
+        print(f"Cambiando domicilio de {self.nombre} {self.apellido} a {nuevo_domicilio}")
+        self.guardar_en_json()
+
+    def to_dict(self):
+        return {
+            "Nombre": self.nombre,
+            "Apellido": self.apellido,
+            "DNI": self.dni,
+            "Fecha de nacimiento": self.fecha_nacimiento,
+            "Tutor": self.tutor,
+            "Notas": self.notas,
+            "Faltas": self.faltas,
+            "Amonestaciones": self.amonestaciones
+        }
+
+    def guardar_en_json(self):
+        with open("data.json", "w") as file:
+            json.dump(self.to_dict(), file, indent=4)
+
+def cargar_alumno_desde_json():
+    try:
+        with open("data.json", "r") as file:
+            data = json.load(file)
+            return Alumno(**data)
+    except FileNotFoundError:
+        return None
+
+# Función para ingresar los datos del alumno desde la entrada del usuario
+def ingresar_datos_alumno():
+    nombre = input("Ingrese el nombre del alumno: ")
+    apellido = input("Ingrese el apellido del alumno: ")
+    dni = input("Ingrese el DNI del alumno: ")
+    fecha_nacimiento = input("Ingrese la fecha de nacimiento del alumno (formato: dd/mm/yyyy): ")
+    tutor = input("Ingrese el nombre y apellido del tutor del alumno: ")
+
+    return Alumno(nombre, apellido, dni, fecha_nacimiento, tutor)
+
+# Programa interactivo
+def programa_interactivo():
+    alumno = cargar_alumno_desde_json()
+
+    if alumno is None:
+        print("No se encontró un alumno en el archivo JSON. Se creará uno nuevo.")
+        alumno = ingresar_datos_alumno()
+
+    while True:
+        print("\n1. Ingresar nota")
+        print("2. Asignar falta")
+        print("3. Asignar amonestación")
+        print("4. Cambiar domicilio")
+        print("5. Guardar y salir")
+
+        opcion = input("Seleccione una opción (1-5): ")
+
+        if opcion == "1":
+            nota = float(input("Ingrese la nota: "))
+            alumno.ingresar_nota(nota)
+            print(f"Nota ingresada: {nota}")
+        elif opcion == "2":
+            alumno.asignar_falta()
+            print("Falta asignada")
+        elif opcion == "3":
+            alumno.asignar_amonestacion()
+            print("Amonestación asignada")
+        elif opcion == "4":
+            nuevo_domicilio = input("Ingrese el nuevo domicilio: ")
+            alumno.cambiar_domicilio(nuevo_domicilio)
+            print(f"Domicilio cambiado a: {nuevo_domicilio}")
+        elif opcion == "5":
+            alumno.guardar_en_json()
+            break
+        else:
+            print("Opción no válida. Por favor, elija una opción válida.")
+
+# Ejecutar el programa interactivo
+programa_interactivo()
 modificar_datos_alumno()
+
